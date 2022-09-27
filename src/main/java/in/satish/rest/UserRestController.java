@@ -2,8 +2,6 @@ package in.satish.rest;
 
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +22,7 @@ import in.satish.service.UserService;
 
 @RestController
 public class UserRestController {
-
+	String response = AppConstants.EMPTY_STR;
 	private UserService userService;
 	
 	private Map<String, String> messages;
@@ -36,7 +34,7 @@ public class UserRestController {
 	
 	@PostMapping("/user")
 	public ResponseEntity<String> saveUser(@RequestBody SignupRequest sr){
-		String response = AppConstants.EMPTY_STR;
+		
 		boolean insertUser = userService.insertUser(sr);
 		if(insertUser) {
 			response = messages.get(AppConstants.SAVE_SUCC);
@@ -49,14 +47,14 @@ public class UserRestController {
 	
 	@PostMapping("/activateAccount")
 	public ResponseEntity<String> activateUserAccount(@RequestBody ActivateAccount ac){
-		String response = AppConstants.EMPTY_STR;
+		
 		boolean activatedUserAccount = userService.activateUserAccount(ac);
 		if(activatedUserAccount) {
 			response = messages.get(AppConstants.ACTIVATE_ACCOUNT_SUCC);
-			return new ResponseEntity<String> (response, HttpStatus.CREATED);
+			return new ResponseEntity<> (response, HttpStatus.CREATED);
 		}else {
 			response = messages.get(AppConstants.ACTIVATE_ACCOUNT_FAIL);
-			return new ResponseEntity<String> (response, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<> (response, HttpStatus.BAD_REQUEST);
 		}
 			
 	}
@@ -75,7 +73,7 @@ public class UserRestController {
 	
 	@PutMapping("/user")
 	public ResponseEntity<String> updateUser(@RequestBody SignupRequest sr){
-		String response = AppConstants.EMPTY_STR;
+		
 		boolean updateUser = userService.updateUser(sr);
 		
 		if(updateUser) 
@@ -83,44 +81,44 @@ public class UserRestController {
 		else
 			response = messages.get(AppConstants.UPDATE_FAIL);
 		
-		return new ResponseEntity<String> (response, HttpStatus.OK);
+		return new ResponseEntity<> (response, HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable Integer id){
-		String response =AppConstants.EMPTY_STR;
+		
 		boolean deleteUser = userService.deleteUser(id);
 		if(deleteUser)
 			response = messages.get(AppConstants.DELETE_SUCC);
 		else
 			response = messages.get(AppConstants.DELETE_FAIL);	
 		
-		return new ResponseEntity<String> (response, HttpStatus.OK);
+		return new ResponseEntity<> (response, HttpStatus.OK);
 	}
 	
 	@PutMapping("/user/{id}/{status}")
 	public ResponseEntity<String> changeAccountStatus(@PathVariable Integer id, @PathVariable String status){
-		String response = AppConstants.EMPTY_STR;
+		
 		boolean activateUser = userService.changeAccountStatus(id, status);
 		if(activateUser) {
 			response = messages.get(AppConstants.CHANGE_SUCC);
-			return new ResponseEntity<String> (response, HttpStatus.OK);
+			return new ResponseEntity<> (response, HttpStatus.OK);
 		}else {
 			response = messages.get(AppConstants.CHANGE_FAIL);
-			return new ResponseEntity<String> (response, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<> (response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@PostMapping("/login")
 	public ResponseEntity<String> userLogin(@RequestBody LoginRequest lr){
 		String loginUser = userService.loginUser(lr);
-		return new ResponseEntity<String> (loginUser, HttpStatus.OK);
+		return new ResponseEntity<> (loginUser, HttpStatus.OK);
 	}
 	
 	@GetMapping("/forgetPassword/{email}")
 	public ResponseEntity<String> recoverForgetPassword(@PathVariable String email){
 		String status = userService.forgetPassword(email);
-		return new ResponseEntity<String> (status, HttpStatus.OK);
+		return new ResponseEntity<> (status, HttpStatus.OK);
 		
 	}
 }

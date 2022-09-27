@@ -2,6 +2,9 @@ package in.satish.constants;
 
 public class AppConstants {
 
+	private AppConstants() {
+		throw new IllegalStateException("Utility class");
+	}
 	public static final String EMPTY_STR = "";
 	public static final String SAVE_SUCC = "saveSucc";
 	public static final String SAVE_FAIL = "saveFail";

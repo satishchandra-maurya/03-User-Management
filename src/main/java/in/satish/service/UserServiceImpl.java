@@ -2,16 +2,16 @@ package in.satish.service;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
-
 import in.satish.custom.EmailSender;
 import in.satish.entity.UserRegister;
 import in.satish.repo.UserRepository;
@@ -22,7 +22,10 @@ import in.satish.response.SearchResponse;
 
 @Service
 public class UserServiceImpl implements UserService{
-
+	Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
+	private SecureRandom random = new SecureRandom();
+	
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -103,7 +106,7 @@ public class UserServiceImpl implements UserService{
 			userRepository.deleteById(id);
 			status = true;
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error("Exception occured ", e);
 		}
 		return status;
 	}
@@ -125,8 +128,6 @@ public class UserServiceImpl implements UserService{
 	public String forgetPassword(String email) {
 		
 		UserRegister entity = userRepository.findByEmail(email);
-		
-		String password = entity.getPassword();
 		
 		if(entity==null) {
 			return "Invalid Email";
@@ -157,7 +158,6 @@ public class UserServiceImpl implements UserService{
 	public String loginUser(LoginRequest lr) {
 		UserRegister entity = 
 				userRepository.findByEmailAndPassword(lr.getEmail(), lr.getPassword());
-		System.out.println(entity);
 		
 		if(entity == null) {
 			return "Invalid Credentials..";
@@ -174,14 +174,13 @@ public class UserServiceImpl implements UserService{
 		String upperAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		String lowerAlphabet = "abcdefghijklmnopqrstuvwxyz";
 		String numbers = "0123456789";
-		String alphaNumeric = upperAlphabet + lowerAlphabet + numbers;
+		String alphaNumeric = upperAlphabet+lowerAlphabet+ numbers;
 		
 		StringBuilder sb = new StringBuilder();
-		Random random = new Random();
-		
+	
 		int length = 8;
 		for(int i=0; i<length; i++) {
-			int index = random.nextInt(alphaNumeric.length());
+			int index = this.random.nextInt(alphaNumeric.length());
 			char randomChar = alphaNumeric.charAt(index);
 			sb.append(randomChar);
 			
@@ -192,17 +191,22 @@ public class UserServiceImpl implements UserService{
 	private String readEmailBody(String fullname, String password, String filename)	{
 		String mailBody = null;
 		String url = "";
-		try {
+		try (
+				
+				FileReader fr = new FileReader(filename);
+				BufferedReader br = new BufferedReader(fr);
+			)
+		
+		{
 			
-			FileReader fr = new FileReader(filename);
-			BufferedReader br = new BufferedReader(fr);
-			StringBuffer buffer = new StringBuffer();
+			
+			StringBuilder buffer = new StringBuilder();
 			String line = br.readLine();
 			while(line != null) {
 				buffer.append(line);
 				line = br.readLine();
 			}
-			br.close();
+			
 			mailBody = buffer.toString();
 			mailBody= mailBody.replace("{FULLNAME}", fullname);
 			mailBody= mailBody.replace("{TEMP-PWD}", password);
@@ -210,48 +214,11 @@ public class UserServiceImpl implements UserService{
 			mailBody= mailBody.replace("{PASSWORD}", password);
 			
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error("Exception occured ", e);
 		}
 		
 		return mailBody;
 	}
-
-/*	@Override
-	public String loginUser(LoginRequest lr) {
-		UserRegister entity = new UserRegister();
-		entity.setEmail(lr.getEmail());
-		entity.setPassword(lr.getPassword());
-		
-		//select * from user_register where email=? and password=?
-		Example<UserRegister> of = Example.of(entity);
-		List<UserRegister> findAll = userRepository.findAll(of);
-		
-		if(findAll.isEmpty()) {
-			return "Invalid Credentials!..";
-		}else {
-			UserRegister userRegister = findAll.get(0);
-			if(userRegister.getActiveSw().equals("Active")) {
-				return "Login Success !..";
-			}else {
-				return "Account Not Activated !...";
-			}
-		}
-		
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-*/
-	
-	
-
 
 	
 	
